@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App/app';
-import firebase, { FirebaseContext } from './components/Firebase';
+import Firebase, { FirebaseContext } from './components/Firebase';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
 <React.StrictMode>
-  <FirebaseContext.Provider value={firebase}>
+  <FirebaseContext.Provider value={new Firebase()}>
     <App />
   </FirebaseContext.Provider>
   </React.StrictMode>,
