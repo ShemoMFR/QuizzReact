@@ -8,6 +8,7 @@ function Welcome(props) {
     const firebase = useContext(FirebaseContext);
 
     const [userSession, setUserSession] = useState(null);
+    const [userData, setUserData] = useState({});
 
     useEffect(() => {
 
@@ -17,10 +18,27 @@ function Welcome(props) {
             user ? setUserSession(user) : props.history.push('/');
         })
 
+    /* Attends que userSession ne soit pas null */ 
+        if(!!userSession) {
+            firebase.user(userSession.uid)
+            .get()
+            .then((doc) => {
+                if (doc && doc.exists) {
+                    const myData = doc.data();
+                    setUserData(myData);            }
+            })
+            .catch(error => {
+                console.log(error)
+            })
+        }
+
+    /* action a mettre en place lors du démontage */
+
         return () => {
             listener();
         };
-    }, [])
+
+    }, [userSession])
 
     return (
         userSession === null ? (
@@ -32,7 +50,7 @@ function Welcome(props) {
             <div className="quiz-bg">
                 <div className='container'>
                     <Logout />
-                    <Quizz />
+                    <Quizz userData={userData} />
                 </div>
             </div>
             )
