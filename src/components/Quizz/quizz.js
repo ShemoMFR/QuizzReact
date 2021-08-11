@@ -1,7 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 import Levels from '../Levels/levels';
 import ProgressBar from '../ProgressBar/progressbar';
 import { QuizMarvel } from '../QuizzMarvel/questions';
+import QuizzOver from '../QuizzOver/quizzover';
+
+// configure la biblio toast pour pop-ups
+
+toast.configure();
 
 class Quizz extends Component {
 
@@ -15,7 +22,9 @@ class Quizz extends Component {
       idQuestion: 0,
       btnDisable: true,
       userAnswer: null,
-      score: 0
+      score: 0,
+      showWelcomeMsg: false,
+      quizzEnd: false
    };
 
    storedDataRef = React.createRef();
@@ -40,6 +49,24 @@ class Quizz extends Component {
       }
    };
 
+   showWelcomeMsg = (pseudo) => {
+      if (!this.state.showWelcomeMsg) {
+
+         this.setState({
+            showWelcomeMsg: true
+         });
+
+         toast.warn(`Bienvenue ${pseudo} et bonne chance!`, {
+            position: "top-right",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false
+         });
+      }
+   }
+
    componentDidMount() {
       this.loadQuestions(this.state.levelNames[this.state.quizzLevel]);
    };
@@ -63,11 +90,15 @@ class Quizz extends Component {
          })
       };
 
+      if (this.props.userData.pseudo) {
+         this.showWelcomeMsg(this.props.userData.pseudo)
+      }
+
    };
 
    nextQuestion = () => {
       if (this.state.idQuestion === this.state.maxQuestions - 1) {
-
+         this.gameOver();
       } else {
          this.setState((prevState) => ({
             idQuestion: prevState.idQuestion + 1
@@ -76,11 +107,31 @@ class Quizz extends Component {
 
       const goodAnswer = this.storedDataRef.current[this.state.idQuestion].answer;
 
-      if (this.state.userAnwer === goodAnswer) {
+      if (this.state.userAnswer === goodAnswer) {
+
+         toast.success("Bravo +1 point !", {
+            position: "top-right",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false
+         });
+
          this.setState((prevState) => ({
             score: prevState.score + 1
          }))
-      };
+      } else {
+
+            toast.error("Raté +0 !", {
+            position: "top-right",
+            autoClose: 2500,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false
+         });
+      }
    };
 
    submitAnswer = (selectedAnswer) => {
@@ -88,9 +139,17 @@ class Quizz extends Component {
          userAnswer: selectedAnswer,
          btnDisable: false
       })
-   }
+   };
+
+   gameOver = () => {
+      this.setState({
+         quizzEnd: true
+      });
+   };
 
    render() {
+
+      const { pseudo } = this.props.userData;
 
       const displayOptions = this.state.options.map((option, index) => {
          return (
@@ -102,9 +161,11 @@ class Quizz extends Component {
          )
       })
 
-    const { pseudo } = this.props.userData;
-       return (
-          <div>
+      return this.state.quizzEnd ? (
+         <QuizzOver />
+      )
+      : (
+         <Fragment>
              <Levels />
              <ProgressBar />
              <h2>{this.state.question}</h2>
@@ -113,8 +174,9 @@ class Quizz extends Component {
 
              <button onClick={this.nextQuestion}
              disabled={this.state.btnDisable} className="btnSubmit">Suivant</button>
-          </div> 
-       );
+          </Fragment>
+      )
+           
    };
 }
 
