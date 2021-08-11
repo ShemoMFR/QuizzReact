@@ -20,7 +20,7 @@ function Welcome(props) {
 
     /* Attends que userSession ne soit pas null */ 
         if(!!userSession) {
-            firebase.user(userSession.uid)
+            firebase.user(userSession.uid) /* récupération de la data lié à un uid */
             .get()
             .then((doc) => {
                 if (doc && doc.exists) {
